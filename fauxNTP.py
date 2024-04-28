@@ -19,7 +19,8 @@ class NTPTimestamp:
 
     @classmethod
     def from_unix(cls, ts):
-        ts += 2208988800 # Seconds since Jan 1 1900
+        ts += 2208988800 # align 1970 epoch to 1900 epoch
+        ts %= 2**32 # cap seconds to 32 bits
         return cls(int(ts * 2**32).to_bytes(8))
 
 @dc.dataclass
