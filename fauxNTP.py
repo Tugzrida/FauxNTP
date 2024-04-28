@@ -8,8 +8,14 @@ class NTPTimestamp:
     bytes: bytes = b"\x00\x00\x00\x00\x00\x00\x00\x00"
 
     def to_datetime(self):
-        sec = int.from_bytes(self.bytes) / 2**32
-        return datetime.fromtimestamp(sec - 2208988800, UTC)
+        sec = -2208988800 + (int.from_bytes(self.bytes) / 2**32) # unix timestamp, assuming NTP era 0
+
+        # Only return dates in an era-length period centred on now, requires peer to be within ~68 years of this machine
+        oldest = time.time() - 2**31
+        while sec < oldest:
+            sec += 2**32
+
+        return datetime.fromtimestamp(sec, UTC)
 
     @classmethod
     def from_datetime(cls, dt):
